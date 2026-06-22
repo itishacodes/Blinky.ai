@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blinky.ai — Advanced AI Sandbox</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    .font-pixel { font-family: 'Press Start 2P', monospace; }
+    .font-lcd { font-family: 'VT323', monospace; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #334155;
+      height: 8px;
+      border-radius: 9999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2dd4bf;
+      border: 3px solid #0f172a;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-[#020617] font-lcd text-xl antialiased h-screen w-screen overflow-hidden flex items-center justify-center p-3 text-[#0f172a]">
+
+  <div class="w-full max-w-[1280px] h-[95vh] flex flex-col bg-[#1e293b] border-[6px] border-[#0f172a] rounded-[28px] p-4 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+    
+    <div class="flex items-center justify-between bg-slate-900 border-4 border-[#0f172a] rounded-xl px-5 py-2.5 mb-3 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="h-4 w-4 rounded-full bg-emerald-400 border-2 border-[#0f172a] animate-pulse shadow-[0_0_10px_#10b981]"></div>
+        <h1 class="font-pixel text-xs md:text-sm tracking-wider text-slate-100">NEURAL SWARM <span class="text-teal-400">SANDBOX v1.0</span></h1>
+      </div>
+      <div class="text-[12px] text-slate-400 font-sans font-bold bg-slate-950 px-3 py-1 rounded border border-slate-800">
+        Status: <span class="text-emerald-400">Pure Genetic Algorithm (No Libraries)</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-[280px_1fr_260px] gap-4 grow min-h-0 overflow-hidden">
+      
+      <div class="bg-slate-300 border-4 border-[#0f172a] rounded-xl p-3 flex flex-col justify-between overflow-hidden">
+        <div class="flex flex-col grow justify-between space-y-2">
+          <h2 class="bg-[#0f172a] text-teal-400 font-pixel text-[9px] text-center py-2 rounded tracking-wider">COMMAND MATRIX</h2>
+          
+          <div class="bg-slate-900 border-2 border-[#0f172a] rounded-lg px-3 py-1.5 shrink-0">
+            <div class="text-[10px] text-teal-400 font-sans font-black tracking-wider flex justify-between">
+              <span>LIFESPAN CLOCK</span>
+              <span id="frameCounter">0/400</span>
+            </div>
+            <div class="w-full bg-slate-950 h-2.5 rounded mt-1 overflow-hidden border border-slate-700">
+               <div id="lifeBar" class="h-full bg-teal-400 w-0 transition-all duration-75"></div>
+            </div>
+          </div>
+
+          <div class="bg-indigo-950 border-2 border-indigo-800 text-indigo-200 rounded-lg p-2.5 text-xs font-sans grow overflow-y-auto leading-tight shadow-inner">
+            <span class="font-black block text-teal-400 mb-1 uppercase tracking-wide text-[11px]">🛠️ Sandbox Interactive Guide:</span>
+            * <b class="text-white">Draw Walls:</b> Canvas par click aur drag karke apni marzi ki deewar banao!<br>
+            * <b class="text-white">Export Brain:</b> Jab elite rocket seekh jaye, uska DNA `.json` file me download karo.<br>
+            * <b class="text-white">Import Brain:</b> Purani brain file upload karke check karo model kaise load hota hai.
+          </div>
+
+          <div class="bg-slate-900 border-2 border-[#0f172a] rounded-lg p-2.5 space-y-2 shrink-0">
+            <div class="text-[9px] font-pixel text-teal-400 tracking-wider text-center border-b border-slate-800 pb-1.5">MODEL DEPLOYMENT (I/O)</div>
+            <button id="btnExport" class="w-full bg-teal-500 hover:bg-teal-600 border border-slate-950 text-slate-950 font-sans font-black text-xs py-1.5 rounded cursor-pointer transition-colors shadow">📥 EXPORT BEST BRAIN (.JSON)</button>
+            
+            <label class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-sans font-black text-xs py-1.5 rounded cursor-pointer transition-colors text-center block shadow border border-slate-950">
+              📤 IMPORT BRAIN FILE
+              <input type="file" id="inputFile" accept=".json" class="hidden">
+            </label>
+            <button id="btnClearObs" class="w-full bg-slate-700 hover:bg-slate-600 text-rose-400 font-sans font-black text-xs py-1.5 rounded cursor-pointer transition-colors border border-slate-950">❌ CLEAR CUSTOM WALLS</button>
+          </div>
+
+          <div class="space-y-3 font-sans text-[11px] font-black text-slate-700 shrink-0 bg-white p-2.5 rounded-xl border-2 border-slate-400">
+            <div>
+              <div class="flex justify-between"><span>POPULATION SWARM</span><span id="popVal" class="text-teal-600 font-bold">150</span></div>
+              <input id="popSlider" type="range" min="50" max="400" step="10" value="150" class="w-full mt-1">
+            </div>
+            <div>
+              <div class="flex justify-between"><span>MUTATION DRIFT</span><span id="mutVal" class="text-rose-500 font-bold">2%</span></div>
+              <input id="mutSlider" type="range" min="0" max="15" value="2" class="w-full mt-1">
+            </div>
+            <div>
+              <div class="flex justify-between"><span>ENGINE SPEED</span><span id="spdVal" class="text-indigo-600 font-bold">1x</span></div>
+              <input id="spdSlider" type="range" min="1" max="10" value="1" class="w-full mt-1">
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-2.5 shrink-0 flex gap-2">
+          <button id="btnPause" class="flex-1 bg-amber-400 hover:bg-amber-500 border-2 border-[#0f172a] text-[10px] font-pixel py-2 rounded-lg shadow-[0_3px_0_#0f172a] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer text-slate-950">⏸ PAUSE</button>
+          <button id="btnReset" class="flex-1 bg-rose-400 hover:bg-rose-500 border-2 border-[#0f172a] text-[10px] font-pixel py-2 rounded-lg shadow-[0_3px_0_#0f172a] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer text-slate-950">⟳ RESET</button>
+        </div>
+      </div>
+
+      <div class="bg-slate-300 border-4 border-[#0f172a] rounded-xl p-3 flex flex-col justify-between overflow-hidden">
+        <h2 class="w-full bg-[#0f172a] text-teal-400 font-pixel text-[9px] text-center py-2 rounded tracking-wider">LIVE VECTOR LAB (DRAG TO DRAW WALLS)</h2>
+        
+        <div class="bg-slate-950 border-4 border-[#0f172a] rounded-xl p-1 mt-2 grow flex items-center justify-center min-h-0 relative shadow-inner cursor-crosshair">
+          <canvas id="simCanvas" width="600" height="450" class="border border-slate-900 rounded-lg bg-[#020617] w-full h-full object-contain"></canvas>
+        </div>
+
+        <div class="w-full mt-2.5 bg-slate-900 border-2 border-[#0f172a] rounded-lg p-2 flex justify-center gap-5 text-[10px] font-sans font-bold text-slate-400 shrink-0 uppercase tracking-wide">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-teal-400 rounded-sm opacity-70"></span> Neural Swarm</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-400 rounded-sm shadow-[0_0_6px_#fbbf24]"></span> Elite Alpha</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-1.5 bg-rose-600 rounded-sm"></span> Obstacle Wall</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 border-2 border-emerald-400 rounded-full shadow-[0_0_6px_#34d399]"></span> Target</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-300 border-4 border-[#0f172a] rounded-xl p-3 flex flex-col justify-between overflow-hidden">
+        <div class="flex flex-col grow justify-between space-y-2">
+          <h2 class="bg-[#0f172a] text-teal-400 font-pixel text-[9px] text-center py-2 rounded tracking-wider">ANALYTICS HUD</h2>
+          
+          <div class="grid grid-cols-1 gap-2 shrink-0 mt-1">
+            <div class="bg-slate-900 border-2 border-[#0f172a] rounded-lg p-2.5 shadow-inner">
+              <div class="text-[10px] font-sans text-slate-400 font-black tracking-wider leading-none">GENERATION</div>
+              <div id="hudGen" class="text-3xl font-bold font-pixel text-teal-400 mt-1.5">1</div>
+            </div>
+            <div class="bg-slate-900 border-2 border-[#0f172a] rounded-lg p-2.5 shadow-inner">
+              <div class="text-[10px] font-sans text-slate-400 font-black tracking-wider leading-none">TARGET HITS</div>
+              <div id="hudSuccess" class="text-2xl font-bold font-pixel text-emerald-400 mt-1.5">0</div>
+            </div>
+            <div class="bg-slate-900 border-2 border-[#0f172a] rounded-lg p-2.5 shadow-inner">
+              <div class="text-[10px] font-sans text-slate-400 font-black tracking-wider leading-none">MAX FITNESS VALUE</div>
+              <div id="hudScore" class="text-lg font-bold font-pixel text-amber-400 mt-1.5">0</div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border-2 border-[#0f172a] rounded-lg p-2 mt-1 grow flex flex-col justify-between min-h-0 shadow-inner">
+            <div class="text-[10px] uppercase font-sans font-black text-teal-400 opacity-80 leading-none mb-1.5 tracking-wider">FITNESS CURVE HISTOGRAM</div>
+            <div class="grow relative min-h-0 w-full">
+              <canvas id="chartCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    // Engine Constants
+    const CANVAS_W = 600;
+    const CANVAS_H = 450;
+    const LIFESPAN = 400; 
+    const MAX_FORCE = 0.25; 
+    const MAX_SPEED = 5.5;   
+    
+    const TARGET = { x: CANVAS_W / 2, y: 50, r: 22 };
+    const START_POS = { x: CANVAS_W / 2, y: CANVAS_H - 30 };
+    
+    // Multi-Obstacle Array Architecture
+    let obstacles = [
+      { x: 150, y: 220, w: 300, h: 20 } // Default center blocker
+    ];
+
+    const state = {
+      popSize: 150,
+      mutationRate: 0.02,
+      speed: 1,
+      paused: false,
+      generation: 1,
+      history: [],
+      successCount: 0
+    };
+
+    let population = [];
+    let age = 0; 
+    let rafId = null;
+
+    // Mouse Drag State Configuration
+    let isDrawing = false;
+    let dragStart = { x: 0, y: 0 };
+    let dragCurrent = { x: 0, y: 0 };
+
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+    const chartCanvas = document.getElementById('chartCanvas');
+    const chartCtx = chartCanvas.getContext('2d');
+
+    function resizeChart() {
+      const rect = chartCanvas.parentNode.getBoundingClientRect();
+      chartCanvas.width = rect.width;
+      chartCanvas.height = rect.height;
+    }
+
+    function randomVector() {
+      let angle = Math.random() * Math.PI * 2;
+      return { x: Math.cos(angle) * MAX_FORCE, y: Math.sin(angle) * MAX_FORCE };
+    }
+
+    // DNA Matrix
+    class DNA {
+      constructor(genes) {
+        this.genes = genes ? genes : [];
+        if (!genes) {
+          for (let i = 0; i < LIFESPAN; i++) this.genes[i] = randomVector();
+        }
+      }
+      crossover(partner) {
+        let newGenes = [];
+        let mid = Math.floor(Math.random() * this.genes.length);
+        for (let i = 0; i < this.genes.length; i++) {
+          newGenes[i] = i > mid ? this.genes[i] : partner.genes[i];
+        }
+        return new DNA(newGenes);
+      }
+      mutate() {
+        for (let i = 0; i < this.genes.length; i++) {
+          if (Math.random() < state.mutationRate) this.genes[i] = randomVector();
+        }
+      }
+    }
+
+    // Rocket Agent Engine
+    class Rocket {
+      constructor(dna) {
+        this.x = START_POS.x;
+        this.y = START_POS.y;
+        this.vx = 0; this.vy = 0;
+        this.ax = 0; this.ay = 0;
+        this.dna = dna || new DNA();
+        this.fitness = 0;
+        this.crashed = false;
+        this.completed = false;
+        this.timeCompleted = LIFESPAN;
+        this.isElite = false;
+        this.trail = [];
+      }
+
+      applyForce(force) {
+        this.ax += force.x;
+        this.ay += force.y;
+      }
+
+      update() {
+        if (!this.crashed && !this.completed) {
+          this.applyForce(this.dna.genes[age]);
+          this.vx += this.ax; this.vy += this.ay;
+          
+          let speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
+          if (speed > MAX_SPEED) {
+            this.vx = (this.vx / speed) * MAX_SPEED;
+            this.vy = (this.vy / speed) * MAX_SPEED;
+          }
+          
+          this.x += this.vx; this.y += this.vy;
+          this.ax = 0; this.ay = 0;
+
+          if (age % 5 === 0) {
+            this.trail.push({x: this.x, y: this.y});
+            if (this.trail.length > 8) this.trail.shift();
+          }
+          this.checkCollisions();
+        }
+      }
+
+      checkCollisions() {
+        let dx = this.x - TARGET.x;
+        let dy = this.y - TARGET.y;
+        if (Math.sqrt(dx*dx + dy*dy) < TARGET.r) {
+          this.completed = true;
+          this.timeCompleted = age;
+          this.x = TARGET.x; this.y = TARGET.y;
+        }
+
+        // Loop through dynamically drawn multiple obstacles
+        for (let obs of obstacles) {
+          if (this.x > obs.x && this.x < obs.x + obs.w && this.y > obs.y && this.y < obs.y + obs.h) {
+            this.crashed = true;
+          }
+        }
+
+        if (this.x < 0 || this.x > CANVAS_W || this.y < 0 || this.y > CANVAS_H) {
+          this.crashed = true;
+        }
+      }
+
+      calcFitness() {
+        let dx = this.x - TARGET.x;
+        let dy = this.y - TARGET.y;
+        let d = Math.sqrt(dx*dx + dy*dy);
+
+        this.fitness = Math.pow(1 / (d + 1), 2);
+        if (this.completed) {
+          this.fitness *= 12;
+          this.fitness *= (1.5 - (this.timeCompleted / LIFESPAN)); 
+        }
+        if (this.crashed) this.fitness *= 0.08;
+      }
+    }
+
+    function initPopulation() {
+      population = [];
+      for (let i = 0; i < state.popSize; i++) population[i] = new Rocket();
+    }
+
+    function resetEngine() {
+      state.generation = 1;
+      state.history = [];
+      state.successCount = 0;
+      age = 0;
+      initPopulation();
+      resizeChart();
+      updateHUD();
+    }
+
+    function evaluateAndEvolve() {
+      let maxFit = 0;
+      let successes = 0;
+
+      for (let i = 0; i < state.popSize; i++) {
+        population[i].calcFitness();
+        if (population[i].fitness > maxFit) maxFit = population[i].fitness;
+        if (population[i].completed) successes++;
+      }
+
+      for (let i = 0; i < state.popSize; i++) population[i].fitness /= maxFit;
+
+      let bestRocket = population[0];
+      for (let i = 1; i < state.popSize; i++) {
+        if (population[i].fitness > bestRocket.fitness) bestRocket = population[i];
+      }
+
+      state.successCount = successes;
+      state.history.push({ gen: state.generation, bestFitness: maxFit * 10000 });
+      if (state.history.length > 50) state.history.shift();
+
+      let matingPool = [];
+      for (let i = 0; i < state.popSize; i++) {
+        let n = Math.floor(population[i].fitness * 50); 
+        for (let j = 0; j < n; j++) matingPool.push(population[i]);
+      }
+
+      if (matingPool.length === 0) matingPool = [...population];
+
+      let newPopulation = [];
+      
+      // Elite Memory Allocation
+      let eliteChild = new Rocket(new DNA([...bestRocket.dna.genes]));
+      eliteChild.isElite = true;
+      newPopulation.push(eliteChild);
+
+      for (let i = 1; i < state.popSize; i++) {
+        let parentA = matingPool[Math.floor(Math.random() * matingPool.length)].dna;
+        let parentB = matingPool[Math.floor(Math.random() * matingPool.length)].dna;
+        let childDNA = parentA.crossover(parentB);
+        childDNA.mutate();
+        newPopulation[i] = new Rocket(childDNA);
+      }
+
+      population = newPopulation;
+      state.generation++;
+      age = 0;
+      updateHUD();
+      drawChart();
+    }
+
+    // ---------------------------------------------------------
+    // CLICK AND DRAG INTERACTION MATHEMATICS
+    // ---------------------------------------------------------
+    function getCanvasCoords(e) {
+      const rect = simCanvas.getBoundingClientRect();
+      return {
+        x: (e.clientX - rect.left) * (CANVAS_W / rect.width),
+        y: (e.clientY - rect.top) * (CANVAS_H / rect.height)
+      };
+    }
+
+    simCanvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      dragStart = getCanvasCoords(e);
+      dragCurrent = dragStart;
+    });
+
+    simCanvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      dragCurrent = getCanvasCoords(e);
+    });
+
+    simCanvas.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      let endPoint = getCanvasCoords(e);
+      
+      let x = Math.min(dragStart.x, endPoint.x);
+      let y = Math.min(dragStart.y, endPoint.y);
+      let w = Math.abs(dragStart.x - endPoint.x);
+      let h = Math.abs(dragStart.y - endPoint.y);
+      
+      // Ignore super micro clicks
+      if (w > 6 && h > 6) {
+        obstacles.push({ x, y, w, h });
+      }
+    });
+
+    // Model Deployment Module (JSON Exporter)
+    document.getElementById('btnExport').addEventListener('click', () => {
+      let elite = population.find(r => r.isElite) || population[0];
+      if (!elite) return;
+      
+      let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(elite.dna.genes));
+      let downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `neural_rocket_gen_${state.generation}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Model Deployment Module (JSON Importer / Neural Injector)
+    document.getElementById('inputFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          let parsedGenes = JSON.parse(evt.target.result);
+          if (Array.isArray(parsedGenes)) {
+            let importedDNA = new DNA(parsedGenes);
+            population = [];
+            for (let i = 0; i < state.popSize; i++) {
+              let r = new Rocket(new DNA([...importedDNA.genes]));
+              if (i === 0) r.isElite = true;
+              else r.dna.mutate(); // Spawn variations based off the master file
+              population.push(r);
+            }
+            age = 0;
+            state.generation = 1;
+            updateHUD();
+            alert("Neural Weights Loaded Successfully! Swarm has inherited the imported brain.");
+          }
+        } catch (err) {
+          alert("Error: Invalid Model File Layout.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btnClearObs').addEventListener('click', () => { obstacles = []; });
+
+    // Rendering Engine
+    function draw() {
+      simCtx.fillStyle = '#020617';
+      simCtx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+      // Render Target
+      simCtx.fillStyle = 'rgba(52, 211, 153, 0.15)';
+      simCtx.beginPath(); simCtx.arc(TARGET.x, TARGET.y, TARGET.r + 12, 0, Math.PI*2); simCtx.fill();
+      simCtx.fillStyle = '#10b981';
+      simCtx.beginPath(); simCtx.arc(TARGET.x, TARGET.y, TARGET.r, 0, Math.PI*2); simCtx.fill();
+
+      // Render Obstacles (Dynamic Array)
+      simCtx.fillStyle = '#e11d48';
+      simCtx.strokeStyle = '#9f1239';
+      simCtx.lineWidth = 3;
+      for (let obs of obstacles) {
+        simCtx.fillRect(obs.x, obs.y, obs.w, obs.h);
+        simCtx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+      }
+
+      // Live Drag Preview Window
+      if (isDrawing) {
+        simCtx.fillStyle = 'rgba(225, 29, 72, 0.4)';
+        simCtx.strokeStyle = '#f43f5e';
+        simCtx.lineWidth = 2;
+        let x = Math.min(dragStart.x, dragCurrent.x);
+        let y = Math.min(dragStart.y, dragCurrent.y);
+        let w = Math.abs(dragStart.x - dragCurrent.x);
+        let h = Math.abs(dragStart.y - dragCurrent.y);
+        simCtx.fillRect(x, y, w, h);
+        simCtx.strokeRect(x, y, w, h);
+      }
+
+      // Render Rocket Swarm Mesh
+      for (let i = 0; i < state.popSize; i++) {
+        let r = population[i];
+        simCtx.save();
+        simCtx.translate(r.x, r.y);
+        simCtx.rotate(Math.atan2(r.vy, r.vx) + Math.PI/2);
+        
+        let size = r.isElite ? 16 : 11;
+        simCtx.fillStyle = r.isElite ? '#fbbf24' : (r.completed ? '#34d399' : (r.crashed ? '#475569' : 'rgba(45, 212, 191, 0.75)'));
+        
+        simCtx.beginPath();
+        simCtx.moveTo(0, -size); simCtx.lineTo(-size/2, size); simCtx.lineTo(size/2, size);
+        simCtx.closePath(); simCtx.fill();
+        simCtx.restore();
+
+        if ((!r.crashed || r.isElite) && r.trail.length > 0) {
+          simCtx.strokeStyle = r.isElite ? 'rgba(251, 191, 36, 0.4)' : 'rgba(45, 212, 191, 0.12)';
+          simCtx.lineWidth = r.isElite ? 2.5 : 1;
+          simCtx.beginPath();
+          simCtx.moveTo(r.trail[0].x, r.trail[0].y);
+          for(let p of r.trail) simCtx.lineTo(p.x, p.y);
+          simCtx.stroke();
+        }
+      }
+    }
+
+    function drawChart() {
+      chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+      if (state.history.length < 2) return;
+      chartCtx.strokeStyle = '#2dd4bf'; chartCtx.lineWidth = 3; chartCtx.beginPath();
+      let maxVal = Math.max(...state.history.map(h => h.bestFitness), 1);
+      let stepX = chartCanvas.width / (state.history.length - 1);
+      state.history.forEach((h, idx) => {
+        let x = idx * stepX;
+        let y = chartCanvas.height - (h.bestFitness / maxVal * (chartCanvas.height - 12)) - 6;
+        if(idx === 0) chartCtx.moveTo(x, y); else chartCtx.lineTo(x, y);
+      });
+      chartCtx.stroke();
+    }
+
+    function updateHUD() {
+      document.getElementById('hudGen').textContent = state.generation;
+      document.getElementById('hudSuccess').textContent = state.successCount;
+      if (state.history.length > 0) {
+        document.getElementById('hudScore').textContent = Math.round(state.history[state.history.length-1].bestFitness);
+      }
+    }
+
+    function loop() {
+      rafId = requestAnimationFrame(loop);
+      if (!state.paused) {
+        for (let s = 0; s < state.speed; s++) {
+          if (age < LIFESPAN) {
+            for (let i = 0; i < state.popSize; i++) population[i].update();
+            age++;
+            document.getElementById('lifeBar').style.width = `${(age / LIFESPAN) * 100}%`;
+            document.getElementById('frameCounter').textContent = `${age}/${LIFESPAN}`;
+          } else {
+            evaluateAndEvolve();
+          }
+        }
+      }
+      draw();
+    }
+
+    window.addEventListener('resize', () => { resizeChart(); drawChart(); });
+    document.getElementById('popSlider').addEventListener('input', (e) => { 
+      state.popSize = +e.target.value; document.getElementById('popVal').textContent = state.popSize; 
+      while(population.length < state.popSize) population.push(new Rocket());
+      if(population.length > state.popSize) population = population.slice(0, state.popSize);
+    });
+    document.getElementById('mutSlider').addEventListener('input', (e) => { 
+      state.mutationRate = (+e.target.value) / 100; document.getElementById('mutVal').textContent = e.target.value + '%'; 
+    });
+    document.getElementById('spdSlider').addEventListener('input', (e) => { 
+      state.speed = +e.target.value; document.getElementById('spdVal').textContent = state.speed + 'x'; 
+    });
+    document.getElementById('btnPause').addEventListener('click', () => {
+      state.paused = !state.paused; document.getElementById('btnPause').textContent = state.paused ? '▶ RESUME' : '⏸ PAUSE';
+    });
+    document.getElementById('btnReset').addEventListener('click', resetEngine);
+
+    resetEngine();
+    loop();
+  })();
+  </script>
+</body>
+</html>
